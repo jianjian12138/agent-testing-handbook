@@ -1,0 +1,61 @@
+# 平台 P3：CI/CD 质量门禁（对应文档 08 的 P3、文档 09 的 M3）
+#
+# 作用：每次 push / PR 自动跑 Agent 评测，分级门禁不达标就阻断合并。
+# 设计要点：
+#   - quality-gate 作业跑"线上版 Agent"(AGENT_MODE=fixed)，门禁必须过 → 流水线绿
+#   - gate-catches-regression 作业跑"故意留 Bug 的 Agent"(AGENT_MODE=buggy)，
+#     断言门禁必须拦下它 → 证明门禁真在生效，而不是摆设
+# 之后你引入真实回归（改坏 agent 逻辑 / 改坏数据集）时，quality-gate 会变红并阻断 PR。
+
+name: Agent Eval Quality Gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  # ── 主门禁：跑当前 Agent 线上版，门禁必须过 ─────────────────────
+  quality-gate:
+    name: 主门禁 (线上 Agent 必须过)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: 运行评测套件 (AGENT_MODE=fixed = 线上版)
+        env:
+          AGENT_MODE: fixed
+        run: python starter/platform/run_suite.py --report report.json
+      - name: 质量门禁 (核心指标不达标则阻断)
+        run: python starter/platform/quality_gate.py report.json
+      - name: 上传评测报告
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-report
+          path: report.json
+
+  # ── 演示：坏 Agent 必须被门禁拦下（证明门禁在生效）─────────────
+  gate-catches-regression:
+    name: 门禁自检 (坏 Agent 必须被拦)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: 运行评测套件 (AGENT_MODE=buggy = 故意留 Bug 的版本)
+        env:
+          AGENT_MODE: buggy
+        continue-on-error: true   # run_suite 会返回 1，但我们只关心门禁是否拦下它
+        run: python starter/platform/run_suite.py --report report_buggy.json
+      - name: 断言门禁拦下坏 Agent
+        run: |
+          if python starter/platform/quality_gate.py report_buggy.json; then
+            echo "❌ BUG: 门禁没有拦下坏 Agent，请检查 quality_gate.py"
+            exit 1
+          else
+            echo "✅ 门禁正确拦截了坏 Agent (exit 1)，门禁自检通过"
+          fi

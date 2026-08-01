@@ -3,6 +3,7 @@
 > 为**资深自动化测试工程师**定制的 Agent 测试学习路径
 > 版本：v1.0 ｜ 生成日期：2026-08-01
 > 定位：不是科普读物，是一份**可执行的转型作战计划**
+> 仓库：https://github.com/jianjian12138/agent-testing-handbook
 
 ---
 
@@ -167,7 +168,27 @@ pytest evals/test_p1_basic.py -v
 
 ---
 
-## 7. 资料来源说明
+## 7. 在 GitHub 上自动跑（CI 质量门禁 / P3）
+
+仓库已内置 `.github/workflows/agent-eval.yml`，每次推送或开 PR 都会自动：
+
+1. **主门禁** `quality-gate`：跑线上版 Agent（`AGENT_MODE=fixed`），分级门禁必须过，否则阻断合并。
+2. **门禁自检** `gate-catches-regression`：跑故意留 Bug 的版本（`AGENT_MODE=buggy`），断言门禁**必须拦下它**——证明门禁是真在生效，不是摆设。
+
+想亲眼看门禁"掐"住一个坏改动？在本地把 Agent 改坏再推上去：
+
+```bash
+# 故意劣化：把 customer_service_agent.py 的 run_agent 改回"查不到也编一个状态"
+git commit -am "chore: 引入一个回归（演示 CI 拦截）"
+git push
+# → quality-gate 变红并阻断，gate-catches-regression 显示"门禁自检通过"
+```
+
+这就是文档 08 P3 / 文档 09 M3 的落地：评测不是本地一次性脚本，而是流水线里的一道刚性门禁。
+
+---
+
+## 8. 资料来源说明
 
 本手册的方法论综合自以下一手来源（完整索引见 [文档 10](docs/10-资料索引.md)）：
 
