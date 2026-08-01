@@ -5,3 +5,6 @@ __pycache__/
 .env
 report*.json
 .DS_Store
+traces.jsonl
+traces_report.html
+datasets/candidates/backlog.json
