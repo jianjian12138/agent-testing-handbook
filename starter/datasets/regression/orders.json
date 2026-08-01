@@ -1,0 +1,85 @@
+[
+  {
+    "id": "R01",
+    "input": "我的订单12345到哪了？",
+    "expected_tools": [{"name": "query_order", "args": {"order_id": "12345"}}],
+    "expected_output_contains": ["配送中"],
+    "must_not_fabricate": true,
+    "note": "基础查询，必须调对工具且答案与返回一致"
+  },
+  {
+    "id": "R02",
+    "input": "帮我看看订单 67890 的状态",
+    "expected_tools": [{"name": "query_order", "args": {"order_id": "67890"}}],
+    "expected_output_contains": ["已签收"],
+    "must_not_fabricate": true,
+    "note": "不同状态词，验证答案跟随真实数据"
+  },
+  {
+    "id": "R03",
+    "input": "订单11111物流怎么样",
+    "expected_tools": [{"name": "query_order", "args": {"order_id": "11111"}}],
+    "expected_output_contains": ["未发货"],
+    "must_not_fabricate": true,
+    "note": "未发货状态"
+  },
+  {
+    "id": "R04",
+    "input": "你好",
+    "expected_tools": [],
+    "expected_output_contains": [],
+    "must_not_fabricate": true,
+    "note": "问候不应触发工具"
+  },
+  {
+    "id": "R05",
+    "input": "我的订单12345和67890分别到哪了？",
+    "expected_tools": [
+      {"name": "query_order", "args": {"order_id": "12345"}},
+      {"name": "query_order", "args": {"order_id": "67890"}}
+    ],
+    "expected_output_contains": ["配送中", "已签收"],
+    "must_not_fabricate": true,
+    "note": "多订单：应分别查询并分别回答"
+  },
+  {
+    "id": "R06",
+    "input": "查不到的订单00000到哪了？",
+    "expected_tools": [{"name": "query_order", "args": {"order_id": "00000"}}],
+    "expected_output_contains": ["未查到", "确认"],
+    "must_not_fabricate": true,
+    "note": "查不到时必须诚实说明，不得编造状态"
+  },
+  {
+    "id": "R07",
+    "input": "快递到哪了，订单12345",
+    "expected_tools": [{"name": "query_order", "args": {"order_id": "12345"}}],
+    "expected_output_contains": ["配送中"],
+    "must_not_fabricate": true,
+    "note": "同义表述（快递）也应正确路由"
+  },
+  {
+    "id": "R08",
+    "input": "我要退货",
+    "expected_tools": [],
+    "expected_output_contains": [],
+    "must_not_fabricate": true,
+    "note": "无对应工具时不应乱调 query_order"
+  },
+  {
+    "id": "R09",
+    "input": "订单 12345 什么时候到",
+    "expected_tools": [{"name": "query_order", "args": {"order_id": "12345"}}],
+    "expected_output_contains": ["今天 18:00"],
+    "must_not_fabricate": true,
+    "note": "问 ETA，答案应含真实 eta"
+  },
+  {
+    "id": "R10",
+    "input": "订单67890买的是什么",
+    "expected_tools": [{"name": "query_order", "args": {"order_id": "67890"}}],
+    "expected_output_contains": ["显示器"],
+    "must_not_fabricate": true,
+    "note": "问商品名，答案应含真实 item"
+  }
+]
