@@ -8,3 +8,6 @@ report*.json
 traces.jsonl
 traces_report.html
 datasets/candidates/backlog.json
+
+# P2 上传的数据集（运行时产生）
+starter/p2/uploads/

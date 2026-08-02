@@ -22,13 +22,16 @@ starter/
 │   ├── render_traces.py              # M4：traces.jsonl → 瀑布图 HTML
 │   ├── feedback.py                   # M4：失败回流到候选集
 │   ├── demo_trace.py                 # M4：一键演示
+│   ├── web.py                        # M5：零依赖 Web 仪表盘（看板 + 触发评测 + 数据集上传）
 │   └── architecture.md               # 平台架构草稿
 └── p2/
     ├── README.md                     # P2 开源 Agent 评测方案（browser-use 示例）
-    ├── adapter.py                    # AgentAdapter + DummyBrowserAgent + 真实接入示例
-    ├── dataset_p2.json               # 22 条种子数据集（10 条边缘）
-    ├── harness.py                    # P2 评测引擎（评分器 + pass@k）
-    ├── run_p2.py                     # P2 入口
+    ├── adapter.py                    # AgentAdapter + DummyBrowserAgent(含缺陷) + RealisticAgent(正确) + BrowserUseAgent
+    ├── dataset_p2.json               # 184 条数据集（64 条边缘 ≈ 35%）
+    ├── gen_dataset_p2.py             # 数据集生成器（可重跑扩到 ≥100 条）
+    ├── judge.py                      # 真实 LLM-as-Judge（completion 维度，四原则）
+    ├── harness.py                    # P2 评测引擎（评分器 + pass@k，completion 可接 Judge）
+    ├── run_p2.py                     # P2 入口（--agent / --judge / --trials，含 M4 Tracer）
     └── quality_gate_p2.py            # P2 分级门禁
 ```
 
@@ -65,10 +68,24 @@ python demo_trace.py                 # 跑几条用例 → traces.jsonl + traces
 ```bash
 cd p2
 python run_p2.py --report report_p2.json
-# 你会看到下单类用例（P2-07~P2-12）因「多塞 autofill_payment」全部 FAIL，门禁阻断
+# 你会看到下单类用例（P2-00x）因「多塞 autofill_payment」全部 FAIL，门禁阻断
+
+# 换「正确 Agent」跑：100% 通过（证明门禁抓缺陷、不误杀）
+python run_p2.py --agent realistic
+
+# 开真实 LLM-as-Judge（需 openai + key）：completion 维度换成 Judge
+python run_p2.py --judge
 
 # M4 回流闭环：把 P2 失败用例收进候选集
 python ../platform/feedback.py report_p2.json
+```
+
+### M5 · Web 平台（零依赖）
+```bash
+cd platform
+python web.py                      # http://127.0.0.1:8000
+# 仪表盘：加载报告看通过率/各维度/失败下钻；点「运行 P2 评测」服务端触发；
+# 支持 --agent realistic / --judge；POST /api/dataset/upload 上传数据集
 ```
 
 ## 学习顺序建议

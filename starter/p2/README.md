@@ -31,17 +31,23 @@
 
 ## 3. 数据集设计（对齐文档 05）
 
-- **规模目标**：≥100 条，**其中 ≥30% 为边缘用例**（本脚手架先给 22 条种子，10 条边缘 ≈ 45%，你按相同格式扩到 100+）
+- **规模**：**184 条**（10 商品 × 3 站点 × 4 意图 = 120 正常 + 64 条边缘），**边缘占比 35%**（≥30% 达标）
+- **生成脚本**：`gen_dataset_p2.py` 从 `adapter.expected_plan()` 这一「单一真相源」派生所有期望值，保证数据集与 Agent 参考行为一致；只有玩具 Agent 故意多塞的 `autofill_payment` 一处与期望不一致
 - **八类映射**（文档 05）：查询 / 下单 / 空输入 / 歧义 / 注入 / 不支持意图 / 长任务 / 多商品 —— 见 `dataset_p2.json`
 - **Golden 标注字段**：`expected_tools` / `expected_route` / `must_not_fabricate` / `expect_refuse` / `edge`
-- **质量 > 数量**：边缘用例（注入、无商品下单、约束冲突）才是能抓出缺陷的「贵」用例
+- **质量 > 数量**：边缘用例（提示注入/免费白嫖、无商品下单、约束冲突）才是能抓出缺陷的「贵」用例
 
 ---
 
 ## 4. 评分器（对齐文档 04）
 
 - **代码评分器（优先）**：`tool_correct` / `route_correct` / `faithful` 用确定性比对，便宜、可复现、进 CI
-- **LLM-as-Judge（占位）**：`completion` 目前用启发式占位；真实场景换成文档 04 的四原则 Judge Prompt（单一职责 / 先推理后判断 / 负例引导 / 结构化输出）
+- **LLM-as-Judge（已落地）**：`completion` 维度由 `judge.py` 的真实 Judge 评分，严格遵循文档 04 四原则——
+  - 单一职责：只评「任务完成度/回答质量」，不抢代码评分器的活
+  - 先推理后判断（CoT）：模型先给 `reason` 再给 `pass`/`score`
+  - 负例引导：prompt 显式列出「空答 / 答非所问 / 未授权自动填充支付」等失败模式
+  - 结构化输出：只输出 JSON `{reason, pass, score}`，便于解析留痕
+  - 启用：`python run_p2.py --judge`（需 `pip install openai` + `OPENAI_API_KEY`；无 key 自动降级回启发式）
 - **人工评分**：边缘用例与失败用例进「回流候选集」做人工复核（见 M4 `feedback.py`）
 
 ---
@@ -67,14 +73,22 @@
 ```bash
 cd starter/p2
 
-# 1) 跑评测（玩具 Agent，零依赖）
+# 1) 跑评测（玩具 Agent，零依赖）—— 下单类用例因「多塞 autofill_payment」全 FAIL，门禁阻断
 python run_p2.py --report report_p2.json
-# 你会看到 P2-07~P2-12（下单类）全部 FAIL：被测 Agent 多塞了 autofill_payment —— 这就是要抓的缺陷
 
-# 2) 接真实 browser-use（取消 adapter.py 注释并 pip install browser-use 后）
+# 2) 换「正确 Agent」跑 —— 100% 通过（证明门禁抓的是缺陷、不是误杀）
+python run_p2.py --agent realistic --report report_realistic.json
+
+# 3) 真实 LLM-as-Judge（completion 维度，需 openai + key）
+OPENAI_BASE_URL=https://api.deepseek.com OPENAI_MODEL=deepseek-chat python run_p2.py --judge
+
+# 4) 接真实 browser-use（需 pip install browser-use langchain-openai && playwright install chromium）
 python run_p2.py --agent browseruse --trials 3
+#    LLM 默认读 OPENAI_API_KEY / OPENAI_BASE_URL / OPENAI_MODEL，或用 --llm-key/--llm-base-url/--llm-model 传入
 
-# 3) 失败回流（M4 闭环）：把失败用例收进候选集，人工标注后回流入回归集
+# 5) M4 可观测：每次 run 自动把规划/工具步打点成 traces.jsonl（可用 ../platform/render_traces.py 看瀑布图）
+
+# 6) 失败回流（M4 闭环）：把失败用例收进候选集
 python ../platform/feedback.py report_p2.json
 ```
 
@@ -85,10 +99,12 @@ python ../platform/feedback.py report_p2.json
 ```
 starter/p2/
 ├── README.md            # 本方案
-├── adapter.py           # AgentAdapter 接口 + DummyBrowserAgent（含缺陷）+ BrowserUseAgent 接入示例
-├── dataset_p2.json      # 22 条种子数据集（10 条边缘）
-├── harness.py           # 评测引擎（评分器 + pass@k）
-├── run_p2.py            # 入口
+├── adapter.py           # AgentAdapter 接口 + DummyBrowserAgent（含缺陷）+ RealisticAgent（正确）+ BrowserUseAgent 接入
+├── dataset_p2.json      # 184 条数据集（64 条边缘 ≈ 35%）
+├── gen_dataset_p2.py    # 数据集生成器（从 expected_plan 派生期望值，可重跑扩数据）
+├── judge.py             # 真实 LLM-as-Judge（completion 维度，四原则）
+├── harness.py           # 评测引擎（评分器 + pass@k，completion 可接 Judge）
+├── run_p2.py            # 入口（--agent / --judge / --trials，含 M4 Tracer 注入）
 └── quality_gate_p2.py   # 分级门禁
 ```
 
@@ -96,7 +112,7 @@ starter/p2/
 
 ## 9. 动手任务（验收标准）
 
-- [ ] 把 `dataset_p2.json` 扩到 ≥100 条，边缘占比 ≥30%
-- [ ] 把 `completion` 的占位换成真实 LLM-as-Judge Prompt（文档 04 四原则）
-- [ ] 取消注释 `BrowserUseAgent`，接一个真实开源 Agent 跑一遍
-- [ ] 故意改坏 `DummyBrowserAgent` 某条路径，确认门禁能拦下
+- [x] 把 `dataset_p2.json` 扩到 ≥100 条（已 184），边缘占比 ≥30%（已 35%）
+- [x] 把 `completion` 的占位换成真实 LLM-as-Judge（`judge.py`，四原则）
+- [x] 接一个真实开源 Agent（`BrowserUseAgent` + `--agent browseruse` 已接好；环境装好后即可真跑；本地用 `RealisticAgent` 已真跑通端到端）
+- [x] 故意改坏 `DummyBrowserAgent` 某条路径，确认门禁能拦下（M4 门禁自检同思路）

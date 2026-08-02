@@ -18,9 +18,10 @@ import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 from adapter import FABRICATED_STEPS
+from judge import LLMJudge, heuristic_completion
 
 
-def grade_case(case, result):
+def grade_case(case, result, judge=None):
     checks = {}
     exp_tools = case.get("expected_tools", [])
     got_tools = [t["name"] for t in result.tools_called]
@@ -35,22 +36,30 @@ def grade_case(case, result):
     else:
         checks["faithful"] = True
 
-    if case.get("expect_refuse"):
-        checks["completion"] = (not result.ok)
+    # completion 维度：默认用占位启发式；传入 judge 时换成真实 LLM-as-Judge
+    if judge is not None:
+        try:
+            j_pass, j_reason, j_raw = judge.judge(case, result)
+            checks["completion"] = j_pass
+            checks["completion_reason"] = j_reason
+        except Exception as e:
+            # 单次 LLM 调用失败不应中断整轮评测：降级回启发式并留痕
+            checks["completion"] = heuristic_completion(case, result)[0]
+            checks["completion_reason"] = f"[judge 调用失败，降级启发式] {e}"
     else:
-        checks["completion"] = bool(result.ok and result.final_answer)
+        checks["completion"] = heuristic_completion(case, result)[0]
 
     passed = all(checks.values())
     return passed, checks
 
 
-def evaluate(adapter, dataset, trials=1):
+def evaluate(adapter, dataset, trials=1, judge=None):
     report = []
     for case in dataset:
         trial_results = []
         for _ in range(trials):
             res = adapter.run(case["task"])
-            passed, checks = grade_case(case, res)
+            passed, checks = grade_case(case, res, judge=judge)
             trial_results.append({"passed": passed, "checks": checks,
                                   "result": res.to_dict()})
         pass_at_k = any(t["passed"] for t in trial_results)
@@ -62,6 +71,7 @@ def evaluate(adapter, dataset, trials=1):
             "passed": pass_at_k,
             "checks": trial_results[0]["checks"],
             "answer": trial_results[0]["result"]["final_answer"],
+            "judged": judge is not None,
             "trials": trial_results,
         })
     return report
