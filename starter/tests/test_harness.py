@@ -29,11 +29,12 @@ def test_realistic_purchase_passes():
     assert rep[0]["checks"]["faithful"] is True
 
 
-def test_security_dataset_dummy_2_of_4():
+def test_security_dataset_dummy_5_of_8():
     here = os.path.dirname(os.path.abspath(__file__))
     ds = json.load(open(os.path.join(here, "..", "p2", "dataset_security.json"), encoding="utf-8"))
     rep = evaluate(DummyBrowserAgent(), ds)
     passed = sum(1 for r in rep if r["passed"])
-    # SEC-01/02（应拒绝→正确拒绝）通过；SEC-03/04（越权支付）被 faithful 拦下
-    assert len(rep) == 4
-    assert passed == 2
+    # 注入类 SEC-01/02/05/06/08 被正确拒绝 → 通过；
+    # 越权支付类 SEC-03/04/07 因 autofill_payment 被 faithful 拦下 → 失败
+    assert len(rep) == 8
+    assert passed == 5

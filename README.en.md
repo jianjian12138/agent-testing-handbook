@@ -1,7 +1,7 @@
 # Agent Testing Handbook
 
 > A practical transition roadmap + runnable starter kit for **senior automation test engineers** moving into Agent / LLM quality engineering.
-> Version: v1.1 · Updated: 2026-09-15 · Repo: https://github.com/jianjian12138/agent-testing-handbook
+> Version: v1.3 · Updated: 2026-09-16 · Repo: https://github.com/jianjian12138/agent-testing-handbook
 
 [![Stars](https://img.shields.io/github/stars/jianjian12138/agent-testing-handbook?style=social)](https://github.com/jianjian12138/agent-testing-handbook/stargazers)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
@@ -18,15 +18,24 @@
 > You are not starting from zero — you are doing a **tech-stack pivot**: upgrading from "test engineer who writes assertions" to "Agent Quality Engineer (AI QE) who designs graders".
 > This handbook is not a科普 read. It is an **actionable battle plan with runnable code** — you can run your first Agent eval on day one and watch it go red → green.
 
+> 🆕 **v1.3 deepening (stayed on Agent eval — deeper, not wider)**: four core chapters gained hands-on arithmetic details —
+> [03 Metrics arithmetic](docs/03-指标体系.md) (4 scorers: algorithm + numeric examples + threshold rationale),
+> [04 Judge calibration](docs/04-评测方法论.md) (Cohen's κ + confidence gate),
+> [05 Dataset annotation spec](docs/05-数据集工程.md) (field-by-field + anti-contamination),
+> [12 Red-team attack matrix](docs/12-安全与红队评测.md) (5 attack classes + runnable 8-case security set);
+> plus new `starter/p2/dataset_redteam_gaps.json` (edge cases needing LLM-Judge).
+
 ---
 
 ## What you get
 
-- 📚 **11 progressive chapters** (cognitive shift → metrics → methodology → dataset engineering → tooling → production monitoring → 5 hands-on projects → platform build → references → 12-week checklist)
+- 📚 **12 progressive chapters** (cognitive shift → metrics → methodology → dataset engineering → tooling → production monitoring → 5 hands-on projects → platform build → references → 12-week checklist → security & red-team eval)
 - 🧪 **A customer-service Agent with a built-in bug + full eval scaffolding** (`starter/`, **runs fully locally, no API key required**)
 - 🚦 **A real CI quality gate**: the buggy version is automatically blocked by the pipeline, proving the gate is not a decoration
 - 🕸️ **Zero-dependency Trace waterfall + Web dashboard**: see exactly which tool the Agent called and why it failed
 - 🗺️ **A 12-week learning plan** with weekly tasks and acceptance criteria
+- 🛡️ **Security & red-team chapter**: systematic eval for prompt-injection / privilege-escalation / data-leakage + runnable datasets (8 security cases + edge cases)
+- 🧪 **22 unit tests + CI job**: harness / adapter / judge / quality_gate covered; the gate's "live" status is self-provable
 
 ---
 
@@ -47,15 +56,16 @@
 | --- | --- | --- | --- |
 | 01 | [Cognitive Shift: from automation to Agent testing](docs/01-认知迁移.md) | Mental model + terminology map | 1 day |
 | 02 | [Anatomy of the Agent under test](docs/02-被测对象解剖.md) | 6 modules + failure modes | 3 days |
-| 03 | [Metrics: what to measure](docs/03-指标体系.md) | 5-dimension framework + pass@k / pass^k | 3 days |
-| 04 | [Methodology: how to evaluate](docs/04-评测方法论.md) | 3 grader types, LLM-as-Judge, Agent-as-Judge | 5 days |
-| 05 | [Dataset engineering](docs/05-数据集工程.md) | 3 construction ways + golden set + layering | 4 days |
+| 03 | [Metrics: what to measure](docs/03-指标体系.md) | 5-dimension framework + pass@k / pass^k; §3.10 scorer arithmetic | 3 days |
+| 04 | [Methodology: how to evaluate](docs/04-评测方法论.md) | 3 grader types, LLM-as-Judge, Agent-as-Judge; §4.9 Judge calibration & κ | 5 days |
+| 05 | [Dataset engineering](docs/05-数据集工程.md) | 3 construction ways + golden set + layering; §5.11 annotation spec | 4 days |
 | 06 | [Toolchain in practice](docs/06-工具链实战.md) | DeepEval/promptfoo/RAGAS/Langfuse/Inspect AI | 5 days |
 | 07 | [Observability & production monitoring](docs/07-可观测与生产监控.md) | OTel tracing + online eval + failure backflow | 4 days |
 | 08 | [Five hands-on projects](docs/08-实战项目.md) | **Core** Hello Eval → multi-Agent eval | 5 weeks |
 | 09 | [Building an Agent test platform](docs/09-平台搭建.md) | **Core** architecture + 6 milestones | 4 weeks |
 | 10 | [References & Benchmark index](docs/10-资料索引.md) | Sources, papers, repos, benchmarks | as-needed |
 | 11 | [12-week checklist](docs/11-学习计划打卡表.md) | Weekly tasks + acceptance | full |
+| 12 | [Security & Red-team Eval](docs/12-安全与红队评测.md) | Prompt-injection / privilege / leakage methodology + dataset | 3 days |
 
 Runnable starter code: [`starter/`](starter/) — a buggy customer-service Agent + full eval scaffolding (platform M1–M5 implemented, including **P2 open-source Agent eval** and a **zero-dependency `web.py` dashboard**).
 
@@ -164,6 +174,14 @@ Synthesized from first-hand sources (full index in [Chapter 10](docs/10-资料�
 ## 🤝 Contribute
 
 Issues & PRs welcome. If this helped you, a **Star** is the best support ⭐
+
+---
+
+## 📌 Changelog
+
+- **v1.3 (2026-09-16)** · Agent-eval deepening: added [03 Metrics arithmetic](docs/03-指标体系.md) / [04 Judge calibration](docs/04-评测方法论.md) / [05 annotation spec](docs/05-数据集工程.md) / [12 red-team matrix](docs/12-安全与红队评测.md); new `starter/p2/dataset_redteam_gaps.json`; 22 starter unit tests + CI `starter-tests` job.
+- **v1.2 (2026-09-15)** · New Security & red-team chapter (doc 12), `starter/requirements.txt`, `CONTRIBUTING.md`, bilingual "relation to other projects".
+- **v1.1** · Initial release: 11 chapters + `starter/` eval scaffolding + CI quality gate.
 
 ---
 
