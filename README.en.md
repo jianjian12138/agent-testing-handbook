@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
 [![CI Quality Gate](https://github.com/jianjian12138/agent-testing-handbook/actions/workflows/agent-eval.yml/badge.svg)](https://github.com/jianjian12138/agent-testing-handbook/actions/workflows/agent-eval.yml)
-[![Docs](https://img.shields.io/badge/docs-11%20chapters-orange.svg)](docs/)
+[![Docs](https://img.shields.io/badge/docs-12%20chapters-orange.svg)](docs/)
 
 **[中文文档](README.md)**
 
@@ -116,6 +116,20 @@ Full commands in [`starter/README.md`](starter/README.md) (P2 open-source Agent 
 
 Most Agent evaluators fall into three camps: algorithm engineers (rough test cases), app developers (no quality methodology), traditional testers (lack AI literacy).
 **You are the fourth: an Agent Quality Engineer who combines quality methodology + engineering + patched AI literacy** — a scarce role in 2026. Your edge is not "knowing DeepEval", but: designing a quality exit standard from scratch, operating a golden dataset, and building eval platforms the whole team reuses.
+
+---
+
+## 📎 Relation to other projects
+
+This repo focuses on the **learning path + minimal runnable scaffolding for Agent / LLM eval engineering**. It is often confused with the author's other repos — clarified here:
+
+| Project | What it is | How it differs |
+| --- | --- | --- |
+| **luban-test-skill** | An AI test-platform **generator** (FastAPI+LangGraph+Vue3; API/UI/DB/perf/security testing, RAG & LLM-as-Judge) | It is a "tool that builds eval platforms"; this handbook is "materials + exercises that make you an evaluator". Zero-dependency and learning-first. |
+| aotutest / Testing / automation | Traditional automation testing practice | Traditional automation; this repo targets Agent/LLM quality engineering. |
+| baize-agent | A local Agent runtime (pure Python stdlib) | It is one of the "Agents under test"; this handbook teaches you **how to evaluate** it. |
+
+> In one line: **luban-test-skill helps you build the eval platform; this handbook helps you become the person who does the evaluating.** They complement, not replace, each other.
 
 ---
 

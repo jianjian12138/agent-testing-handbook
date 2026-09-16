@@ -1,0 +1,22 @@
+# Agent 测试转型手册 · starter 依赖声明
+#
+# 核心代码（run_suite / harness / adapter / quality_gate / web / trace / judge 启发式）
+# 仅用 Python 标准库即可运行，无需安装任何第三方包。
+#
+# 以下为「按需启用」的可选依赖——只装你要用的那一行即可：
+
+# 1) 开启真实 LLM-as-Judge（p2/run_p2.py --judge、platform/web.py --judge）
+openai>=1.0
+
+# 2) 接入真实 browser-use Agent（p2/run_p2.py --agent browseruse）
+# browser-use>=0.1
+# langchain-openai>=0.1
+
+# 3) 接入真实可观测后端（platform/trace.py：OTel / Langfuse）
+# opentelemetry-api>=1.0
+# opentelemetry-sdk>=1.0
+# opentelemetry-exporter-otlp-proto-grpc>=1.0
+# langfuse>=2.0
+
+# 4) 跑本仓库单元测试（CI 已包含）
+# pytest>=7.0

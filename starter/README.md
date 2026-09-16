@@ -88,6 +88,24 @@ python web.py                      # http://127.0.0.1:8000
 # 支持 --agent realistic / --judge；POST /api/dataset/upload 上传数据集
 ```
 
+## 📦 依赖
+
+核心代码**零依赖**（Python 3.11+ 标准库即可跑通全部闭环）。按需安装可选依赖：
+
+```bash
+pip install -r requirements.txt   # 含 openai(--judge) 等，按需启用；详见文件内注释
+```
+
+## 🧪 测试
+
+```bash
+cd starter
+pytest tests -q                    # 22 个单元测试（应全绿，防回归）
+pytest evals/test_p1_basic.py -v  # P1 最小闭环（含 1 条故意红色：空结果陷阱）
+```
+
+安全评测数据集见 `p2/dataset_security.json`（配合文档 12），运行方式见 `docs/12-安全与红队评测.md`。
+
 ## 学习顺序建议
 
 1. 先 `test_p1_basic.py` 感受"红→绿"闭环（P1）
