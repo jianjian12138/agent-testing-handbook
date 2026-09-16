@@ -147,12 +147,9 @@ Synthesized from first-hand sources (full index in [Chapter 10](docs/10-资料�
 
 ---
 
-## 🤝 Contribute / Topics
+## 🤝 Contribute
 
 Issues & PRs welcome. If this helped you, a **Star** is the best support ⭐
-
-> 💡 Add these **Topics** (repo Settings → Topics) to boost discoverability:
-> `agent-testing` `llm-evaluation` `ai-qe` `qa` `pytest` `llm-as-judge` `quality-gate` `agent-eval` `test-automation` `deepeval` `promptfoo` `ragas` `langfuse` `agentic-ai` `evals` `benchmark`
 
 ---
 

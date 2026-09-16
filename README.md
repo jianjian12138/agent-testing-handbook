@@ -163,12 +163,9 @@ git commit -am "chore: 引入一个回归（演示 CI 拦截）" && git push
 
 ---
 
-## 🤝 如何参与 / 给仓库加"标签"
+## 🤝 如何参与
 
 欢迎提 Issue / PR。如果你觉得有用，**点个 Star** 就是最大的支持 ⭐
-
-> 💡 给仓库加这些 **Topics** 能显著提升被检索到的概率（在仓库 Settings → Topics 添加）：
-> `agent-testing` `llm-evaluation` `ai-qe` `qa` `pytest` `llm-as-judge` `quality-gate` `agent-eval` `test-automation` `deepeval` `promptfoo` `ragas` `langfuse` `agentic-ai` `evals` `benchmark` `chinese`
 
 ---
 
